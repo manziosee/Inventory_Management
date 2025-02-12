@@ -1,0 +1,933 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Inventory Management API",
+    "version": "1.0.0",
+    "description": "API for managing inventory items, borrowings, damage reports, and user accounts."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Local development server"
+    },
+    {
+      "url": "https://inventory-management-api.onrender.com",
+      "description": "Production server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Bearer token is required to access protected routes."
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique user ID"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "User's full name"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email address"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "User's phone number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "Program Manager",
+              "Inventory Manager"
+            ],
+            "description": "User's role in the system"
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique item ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Device",
+              "Furniture",
+              "Cleaning Material",
+              "Food Utensil"
+            ],
+            "description": "Item category"
+          },
+          "serialNumber": {
+            "type": "string",
+            "description": "Item serial number"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "New",
+              "Good",
+              "Worn Out",
+              "Broken"
+            ],
+            "description": "Item condition"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Available",
+              "Borrowed",
+              "Damaged",
+              "Disposed"
+            ],
+            "description": "Item status"
+          }
+        }
+      },
+      "Borrowing": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique borrowing record ID"
+          },
+          "item": {
+            "type": "string",
+            "description": "Reference to the borrowed item"
+          },
+          "borrower": {
+            "type": "string",
+            "description": "Reference to the borrower"
+          },
+          "assignedBy": {
+            "type": "string",
+            "description": "Reference to the user who assigned the item"
+          },
+          "borrowDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the item was borrowed"
+          },
+          "expectedReturnDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Expected return date"
+          }
+        }
+      },
+      "DamageReport": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique damage report ID"
+          },
+          "item": {
+            "type": "string",
+            "description": "Reference to the damaged item"
+          },
+          "reportedBy": {
+            "type": "string",
+            "description": "Reference to the user who reported the damage"
+          },
+          "reportedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the damage was reported"
+          },
+          "damageReason": {
+            "type": "string",
+            "description": "Reason for the damage"
+          },
+          "repairStatus": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Repaired",
+              "Disposed"
+            ],
+            "description": "Repair status of the item"
+          }
+        }
+      },
+      "Person": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Unique person ID"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Full name of the person"
+          },
+          "nationalId": {
+            "type": "string",
+            "description": "National identification number"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address of the person"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "description": "Phone number of the person"
+          },
+          "residence": {
+            "type": "string",
+            "description": "Address of the person"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Users",
+      "description": "Operations related to user accounts"
+    },
+    {
+      "name": "Items",
+      "description": "Operations related to inventory items"
+    },
+    {
+      "name": "Borrowings",
+      "description": "Operations related to item borrowings"
+    },
+    {
+      "name": "Damage Reports",
+      "description": "Operations related to damage reports"
+    },
+    {
+      "name": "People",
+      "description": "Operations related to people (borrowers)"
+    }
+  ],
+  "paths": {
+    "/api/users": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "description": "Full name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email address of the user"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Password for the user"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "Phone number of the user"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "Program Manager",
+                      "Inventory Manager"
+                    ],
+                    "description": "Role of the user"
+                  }
+                },
+                "required": [
+                  "fullName",
+                  "email",
+                  "password",
+                  "phoneNumber",
+                  "role"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., user already exists)"
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "summary": "Authenticate user & get token",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "description": "User's email address"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "User's password"
+                  }
+                },
+                "required": [
+                  "email",
+                  "password"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User authenticated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token for authentication"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/users/profile": {
+      "get": {
+        "summary": "Get user profile",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user profile",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "description": "New full name of the user"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "New email address of the user"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "New phone number of the user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/items": {
+      "post": {
+        "summary": "Create a new item",
+        "tags": [
+          "Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the item"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "Device",
+                      "Furniture",
+                      "Cleaning Material",
+                      "Food Utensil"
+                    ],
+                    "description": "Category of the item"
+                  },
+                  "serialNumber": {
+                    "type": "string",
+                    "description": "Serial number of the item"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "enum": [
+                      "New",
+                      "Good",
+                      "Worn Out",
+                      "Broken"
+                    ],
+                    "description": "Initial condition of the item"
+                  }
+                },
+                "required": [
+                  "name",
+                  "category",
+                  "serialNumber",
+                  "condition"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., item with serial number already exists)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all items with filtering, sorting, and pagination",
+        "tags": [
+          "Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search keyword for item name"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Device",
+                "Furniture",
+                "Cleaning Material",
+                "Food Utensil"
+              ]
+            },
+            "description": "Filter by item category"
+          },
+          {
+            "name": "condition",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "New",
+                "Good",
+                "Worn Out",
+                "Broken"
+              ]
+            },
+            "description": "Filter by item condition"
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Field to sort by (e.g., name, serialNumber, condition)"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort order (asc or desc)"
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Page size for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Item"
+                      }
+                    },
+                    "page": {
+                      "type": "integer",
+                      "description": "Current page number"
+                    },
+                    "pages": {
+                      "type": "integer",
+                      "description": "Total number of pages"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/items/{id}": {
+      "get": {
+        "summary": "Get item by ID",
+        "tags": [
+          "Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update item",
+        "tags": [
+          "Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "New name of the item"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "Device",
+                      "Furniture",
+                      "Cleaning Material",
+                      "Food Utensil"
+                    ],
+                    "description": "New category of the item"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "enum": [
+                      "New",
+                      "Good",
+                      "Worn Out",
+                      "Broken"
+                    ],
+                    "description": "New condition of the item"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "Available",
+                      "Borrowed",
+                      "Damaged",
+                      "Disposed"
+                    ],
+                    "description": "New status of the item"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Item"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete item",
+        "tags": [
+          "Items"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "description": "Deletion message"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        }
+      }
+    },
+    "/api/borrowings": {
+      "post": {
+        "summary": "Create a new borrowing record",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "itemId": {
+                    "type": "string",
+                    "description": "ID of the item being borrowed"
+                  },
+                  "borrowerId": {
+                    "type": "string",
+                    "description": "ID of the borrower"
+                  },
+                  "borrowDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date the item was borrowed"
+                  },
+                  "expectedReturnDate": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Expected return date"
+                  },
+                  "initialCondition": {
+                    "type": "string",
+                    "enum": [
+                      "New",
+                      "Good",
+                      "Worn Out",
+                      "Broken"
+                    ],
+                    "description": "Initial condition of the item"
+                  }
+                },
+                "required": [
+                  "itemId",
+                  "borrowerId",
+                  "borrowDate",
+                  "expectedReturnDate",
+                  "initialCondition"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Borrowing record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Borrowing"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., item not found or not available)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all borrowings with filtering, sorting, and pagination",
+        "tags": [
+          "Borrowings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by item ID"
+          },
+          {
+            "name": "borrowerId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by borrower ID"
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Field to sort by (e.g., borrowDate, expectedReturnDate)"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Sort order (asc or desc)"
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            
