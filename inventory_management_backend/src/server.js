@@ -1,8 +1,8 @@
+// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
-import swaggerJsdoc from 'swagger-jsdoc';
 import connectDB from './config/db.js';
 import { errorHandler, notFound } from './middleware/errorMiddleware.js';
 import userRoutes from './routes/userRoutes.js';
@@ -10,11 +10,8 @@ import itemRoutes from './routes/itemRoutes.js';
 import borrowingRoutes from './routes/borrowingRoutes.js';
 import damageReportRoutes from './routes/damageReportRoutes.js';
 import personRoutes from './routes/personRoutes.js'; // Import Person Routes
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import swaggerDocs from './swaggerOptions.js'; // Import Swagger Docs
+
 dotenv.config();
 
 const app = express();
@@ -26,19 +23,8 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-try {
-    const swaggerDefinition = fs.readFileSync(path.resolve(__dirname, '../src/swagger/swaggerOptions.js'), 'utf-8');
-    const options = {
-      definition: swaggerDefinition,
-      apis: [], // No longer needed as definition is used
-    };
-  
-    const swaggerDocs = swaggerJsdoc(options);
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-  } catch (e) {
-    console.error(e);
-    process.exit(1); // Exit if YAML parsing fails
-  }
+// Serve Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 app.use('/api/users', userRoutes);
