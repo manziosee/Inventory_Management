@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../server');
-const User = require('../../src/models/userModel');
+const User = require('../models/userModel');
 const mongoose = require('mongoose');
 
 describe('User API Endpoints', () => {
