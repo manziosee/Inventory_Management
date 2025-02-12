@@ -15,6 +15,13 @@ import { NewDamageReportPage } from './pages/damage-reports/new';
 import { PeoplePage } from './pages/people';
 import { SettingsPage } from './pages/settings';
 
+// Mock authentication state
+const isAuthenticated = true; // This should be replaced with actual auth logic
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+}
+
 function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [isLandingPage, setIsLandingPage] = useState(true);
@@ -50,15 +57,19 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/inventory" element={<InventoryListPage />} />
-                <Route path="/inventory/new" element={<NewItemPage />} />
-                <Route path="/borrowing" element={<BorrowingListPage />} />
-                <Route path="/borrowing/new" element={<NewBorrowingPage />} />
-                <Route path="/damage-reports" element={<DamageReportListPage />} />
-                <Route path="/damage-reports/new" element={<NewDamageReportPage />} />
-                <Route path="/people" element={<PeoplePage />} />
-                <Route path="/settings" element={<SettingsPage />} />
+                
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+                <Route path="/inventory" element={<PrivateRoute><InventoryListPage /></PrivateRoute>} />
+                <Route path="/inventory/new" element={<PrivateRoute><NewItemPage /></PrivateRoute>} />
+                <Route path="/borrowing" element={<PrivateRoute><BorrowingListPage /></PrivateRoute>} />
+                <Route path="/borrowing/new" element={<PrivateRoute><NewBorrowingPage /></PrivateRoute>} />
+                <Route path="/damage-reports" element={<PrivateRoute><DamageReportListPage /></PrivateRoute>} />
+                <Route path="/damage-reports/new" element={<PrivateRoute><NewDamageReportPage /></PrivateRoute>} />
+                <Route path="/people" element={<PrivateRoute><PeoplePage /></PrivateRoute>} />
+                <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+                
+                {/* Fallback route */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
@@ -69,4 +80,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
