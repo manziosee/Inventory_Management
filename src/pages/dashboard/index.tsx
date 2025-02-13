@@ -1,4 +1,5 @@
-import { Users, Box, AlertTriangle, Clock } from 'lucide-react';
+import { Users, Box, AlertTriangle, Clock, Download } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 export function DashboardPage() {
   const stats = [
@@ -14,17 +15,31 @@ export function DashboardPage() {
     { id: 3, user: 'Alice Johnson', action: 'reported damage', item: 'Monitor', time: '1 day ago' },
   ];
 
+  const handleExportData = (format: 'csv' ) => {
+    // Add your export logic here
+    console.log(`Exporting data in ${format} format`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
-        <div className="flex space-x-4">
+        <div className="flex items-center space-x-4">
           <label htmlFor="dateRange" className="sr-only">Select Date Range</label>
-          <select id="dateRange" className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+          <select 
+            id="dateRange" 
+            className="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
+          >
             <option>Last 7 days</option>
             <option>Last 30 days</option>
             <option>Last 3 months</option>
           </select>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => handleExportData('csv')}>
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+          </div>
         </div>
       </div>
 
