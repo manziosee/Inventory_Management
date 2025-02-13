@@ -12,6 +12,7 @@ import damageReportRoutes from './routes/damageReportRoutes.js';
 import personRoutes from './routes/personRoutes.js'; // Import Person Routes
 import swaggerDocs from './swaggerOptions.js'; // Import Swagger Docs
 
+
 dotenv.config();
 
 const app = express();

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Bell, Search, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
@@ -11,6 +11,12 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
+
+  // Don't show header on auth pages
+  if (['/login', '/register'].includes(location.pathname)) {
+    return null;
+  }
 
   const notifications = [
     { id: 1, title: 'Item Overdue', message: 'MacBook Pro is 2 days overdue', time: '2m ago', read: false },
@@ -23,11 +29,17 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                AssetFlow
+              <Link to="/dashboard" className="flex items-center space-x-2">
+                <img src="/logo.svg" alt="AssetFlow" className="h-8 w-auto" />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <Link
+                to="/dashboard"
+                className="text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500"
+              >
+                Dashboard
+              </Link>
               <Link
                 to="/inventory"
                 className="text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500"
@@ -39,12 +51,6 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                 className="text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500"
               >
                 Borrowing
-              </Link>
-              <Link
-                to="/damage-reports"
-                className="text-gray-900 dark:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-blue-500"
-              >
-                Damage Reports
               </Link>
             </div>
           </div>
@@ -67,7 +73,7 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                title="Toggle notifications"
+                title="Notifications"
               >
                 <Bell className="h-6 w-6" />
               </button>
@@ -102,6 +108,12 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
           <div className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
               <Link
+                to="/dashboard"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Dashboard
+              </Link>
+              <Link
                 to="/inventory"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
@@ -112,12 +124,6 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 Borrowing
-              </Link>
-              <Link
-                to="/damage-reports"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                Damage Reports
               </Link>
             </div>
           </div>

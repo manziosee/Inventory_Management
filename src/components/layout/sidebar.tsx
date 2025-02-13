@@ -1,5 +1,5 @@
 import { Box, ClipboardList, Home, Settings, Users, AlertTriangle } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
 const navigation = [
@@ -12,8 +12,15 @@ const navigation = [
 ];
 
 export function Sidebar() {
+  const location = useLocation();
+
+  // Don't show sidebar on auth pages
+  if (['/login', '/register', '/'].includes(location.pathname)) {
+    return null;
+  }
+
   return (
-    <div className="flex h-full w-64 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="hidden md:flex h-full w-64 flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <nav className="flex-1 space-y-1 px-2 py-4">
         {navigation.map((item) => (
           <NavLink

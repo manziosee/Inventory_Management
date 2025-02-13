@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Plus, Search, MoreVertical } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 
@@ -21,7 +22,6 @@ const people = [
     borrowedItems: 1,
     status: 'Active',
   },
-  // Add more people as needed
 ];
 
 export function PeoplePage() {
@@ -32,12 +32,15 @@ export function PeoplePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">People</h1>
-        <Button>
-          <Plus className="h-5 w-5 mr-2" />
-          Add Person
-        </Button>
+        <Link to="/people/add">
+          <Button>
+            <Plus className="h-5 w-5 mr-2" />
+            Add Person
+          </Button>
+        </Link>
       </div>
 
+      {/* Rest of the component remains the same */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
