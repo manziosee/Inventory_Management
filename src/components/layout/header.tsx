@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Bell, Search, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Moon, Sun, Bell, Search, Menu, X, LogOut } from 'lucide-react';
+
 
 interface HeaderProps {
   darkMode: boolean;
@@ -10,8 +11,10 @@ interface HeaderProps {
 export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Don't show header on auth pages
   if (['/login', '/register'].includes(location.pathname)) {
@@ -22,6 +25,11 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
     { id: 1, title: 'Item Overdue', message: 'MacBook Pro is 2 days overdue', time: '2m ago', read: false },
     { id: 2, title: 'New Damage Report', message: 'Office Chair reported damaged', time: '5m ago', read: true },
   ];
+
+  const handleLogout = () => {
+    // Add your logout logic here
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm">
@@ -85,11 +93,38 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
                 {darkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
               </button>
 
-              <img
-                className="h-8 w-8 rounded-full"
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                alt="User avatar"
-              />
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center"
+                >
+                  <img
+                    className="h-8 w-8 rounded-full"
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    alt="User avatar"
+                  />
+                </button>
+
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5">
+                    <Link
+                      to="/settings"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <div className="flex items-center">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign out
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex sm:hidden">
@@ -125,6 +160,15 @@ export function Header({ darkMode, toggleDarkMode }: HeaderProps) {
               >
                 Borrowing
               </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <div className="flex items-center">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign out
+                </div>
+              </button>
             </div>
           </div>
         )}
