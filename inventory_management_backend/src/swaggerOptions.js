@@ -7,7 +7,13 @@ import jsyaml from 'js-yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
+const swaggerFilePath = path.resolve(__dirname, '../swagger.yaml');
+const swaggerDefinition = jsyaml.load(fs.readFileSync(swaggerFilePath, 'utf-8'));
+const options = {
+  definition: swaggerDefinition,
+  apis: ['./routes/*.js'],
+};
+swaggerDocs = swaggerJsdoc(options);
 let swaggerDocs;
 
 try {
