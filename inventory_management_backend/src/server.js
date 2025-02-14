@@ -1,4 +1,3 @@
-// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -9,9 +8,9 @@ import userRoutes from './routes/userRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import borrowingRoutes from './routes/borrowingRoutes.js';
 import damageReportRoutes from './routes/damageReportRoutes.js';
-import personRoutes from './routes/personRoutes.js'; // Import Person Routes
-import swaggerDocs from './swaggerOptions.js'; // Import Swagger Docs
-
+import personRoutes from './routes/personRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import swaggerDocs from './swaggerOptions.js';
 
 dotenv.config();
 
@@ -32,7 +31,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/borrowings', borrowingRoutes);
 app.use('/api/damage-reports', damageReportRoutes);
-app.use('/api/people', personRoutes); // Use Person Routes
+app.use('/api/people', personRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error Handling
 app.use(notFound);

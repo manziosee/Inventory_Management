@@ -1,56 +1,118 @@
+// src/controllers/itemController.js
 import asyncHandler from 'express-async-handler';
 import Item from '../models/itemModel.js';
 import SystemLog from '../models/systemLogModel.js';
 
 const createItem = asyncHandler(async (req, res) => {
-// ... (Create item logic - unchanged) ...
+  const { name, category, serialNumber, condition, location, purchaseDate, purchasePrice, warranty, maintenanceInterval, notes, supplier, manufacturer } = req.body;
+
+  const item = await Item.create({
+    name,
+    category,
+    serialNumber,
+    condition,
+    location,
+    purchaseDate,
+    purchasePrice,
+    warranty,
+    maintenanceInterval,
+    notes,
+    supplier,
+    manufacturer,
+  });
+
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'ITEM_CREATED',
+    details: { itemId: item._id },
+  });
+
+  res.status(201).json(item);
 });
 
-const getItems = asyncHandler(async (req, res) => {
-  const pageSize = Number(req.query.pageSize) || 10;
-  const page = Number(req.query.pageNumber) || 1;
+export const getItems = asyncHandler(async (req, res) => {
+  const { page = 1, pageSize = 10, search = '', category = '', location = '' } = req.query;
 
-  const keyword = req.query.keyword
-    ? {
-        name: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {};
+  const query = {};
+  if (search) query.name = { $regex: search, $options: 'i' };
+  if (category) query.category = category;
+  if (location) query.location = location;
 
-  const categoryFilter = req.query.category ? { category: req.query.category } : {};
-  const conditionFilter = req.query.condition ? { condition: req.query.condition } : {};
+  const items = await Item.find(query)
+    .skip((page - 1) * pageSize)
+    .limit(Number(pageSize))
+    .populate('assignedTo');
 
-  const count = await Item.countDocuments({ ...keyword, ...categoryFilter, ...conditionFilter });
+  const totalItems = await Item.countDocuments(query);
 
-  const sortOrder = req.query.order === 'desc' ? -1 : 1; // 1 for ascending, -1 for descending
-  const sortField = req.query.orderBy || 'name'; // Default sort by name
-
-  const items = await Item.find({ ...keyword, ...categoryFilter, ...conditionFilter })
-    .sort({ [sortField]: sortOrder })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
-
-  res.json({ items, page, pages: Math.ceil(count / pageSize) });
+  res.json({
+    items,
+    totalItems,
+    page: Number(page),
+    pageSize: Number(pageSize),
+  });
 });
 
 const getItemById = asyncHandler(async (req, res) => {
-  // ... (Get item by ID logic - unchanged) ...
+  const item = await Item.findById(req.params.id).populate('assignedTo');
+
+  if (!item) {
+    res.status(404);
+    throw new Error('Item not found');
+  }
+
+  res.json(item);
 });
 
 const updateItem = asyncHandler(async (req, res) => {
-  // ... (Update item logic - unchanged) ...
+  const item = await Item.findById(req.params.id);
+
+  if (!item) {
+    res.status(404);
+    throw new Error('Item not found');
+  }
+
+  const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('assignedTo');
+
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'ITEM_UPDATED',
+    details: { itemId: updatedItem._id },
+  });
+
+  res.json(updatedItem);
 });
 
 const deleteItem = asyncHandler(async (req, res) => {
-  // ... (Delete item logic - unchanged) ...
+  const item = await Item.findById(req.params.id);
+
+  if (!item) {
+    res.status(404);
+    throw new Error('Item not found');
+  }
+
+  await Item.findByIdAndDelete(req.params.id);
+
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'ITEM_DELETED',
+    details: { itemId: item._id },
+  });
+
+  res.json({ message: 'Item deleted' });
 });
+
+const exportItems = asyncHandler(async (req, res) => {
+  const items = await Item.find().populate('assignedTo');
+
+  res.json(items);
+});
+
 
 export {
   createItem,
-  getItems,
   getItemById,
   updateItem,
   deleteItem,
+  exportItems,
 };

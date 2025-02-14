@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../server');
+const app = require('../../server'); // Corrected path
 const mongoose = require('mongoose');
 const Borrowing = require('../../src/models/borrowingModel');
 const Item = require('../../src/models/itemModel');
@@ -13,7 +13,6 @@ let person;
 
 describe('Borrowing API Endpoints', () => {
   beforeEach(async () => {
-    // 1. Create an admin user
     const adminRes = await request(app)
       .post('/api/users')
       .send({
@@ -27,7 +26,6 @@ describe('Borrowing API Endpoints', () => {
     user = adminRes.body;
     token = adminRes.body.token;
 
-    // 2. Create an item
     const itemRes = await request(app)
       .post('/api/items')
       .set('Authorization', `Bearer ${token}`)
@@ -36,33 +34,30 @@ describe('Borrowing API Endpoints', () => {
         category: 'Device',
         serialNumber: 'BORROW123',
         condition: 'Good',
+        location: 'Main Office',
+        purchaseDate: '2024-01-15',
+        purchasePrice: 1299.99,
+        warranty: '2025-01-15',
+        maintenanceInterval: '1year',
       });
 
     item = itemRes.body;
 
-    // 3. Create a person (borrower)
     const personRes = await request(app)
-      .post('/api/users')
+      .post('/api/people')
+      .set('Authorization', `Bearer ${token}`)
       .send({
         fullName: 'Borrower Person',
+        nationalId: '123456789',
         email: 'borrower@example.com',
-        password: 'password',
         phoneNumber: '555-555-5555',
-        role: 'Program Manager',
+        residence: 'Test Address',
       });
 
-    // 4. Save Person
-    person = await Person.create({
-      fullName: 'Test Person',
-      nationalId: '123456789',
-      email: 'test@example.com',
-      phoneNumber: '555-123-4567',
-      residence: 'Test Address',
-    });
+    person = personRes.body;
   });
 
   afterEach(async () => {
-    // Clean up: Remove all created data
     await User.deleteMany({ email: ['admin@example.com', 'borrower@example.com'] });
     await Item.deleteMany({ name: 'Borrow Test Item' });
     await Borrowing.deleteMany({});
@@ -77,11 +72,31 @@ describe('Borrowing API Endpoints', () => {
         itemId: item._id,
         borrowerId: person._id,
         borrowDate: new Date(),
-        expectedReturnDate: new Date(new Date().setDate(new Date().getDate() + 7)), // 7 days from now
+        expectedReturnDate: new Date(new Date().setDate(new Date().getDate() + 7)),
         initialCondition: 'Good',
       });
 
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('_id');
+  });
+
+  it('should get all borrowings with pagination', async () => {
+    await request(app)
+      .post('/api/borrowings')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        itemId: item._id,
+        borrowerId: person._id,
+        borrowDate: new Date(),
+        expectedReturnDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+        initialCondition: 'Good',
+      });
+
+    const res = await request(app)
+      .get('/api/borrowings?pageSize=1&pageNumber=1')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.borrowings.length).toEqual(1);
   });
 });

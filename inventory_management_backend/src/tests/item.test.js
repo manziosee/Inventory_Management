@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../server');
+const app = require('../../server'); // Corrected path
 const Item = require('../../src/models/itemModel');
 const User = require('../../src/models/userModel');
 const mongoose = require('mongoose');
@@ -8,9 +8,7 @@ let user;
 let token;
 
 describe('Item API Endpoints', () => {
-
   beforeEach(async () => {
-    // Create a test user and get a token
     const res = await request(app)
       .post('/api/users')
       .send({
@@ -26,7 +24,6 @@ describe('Item API Endpoints', () => {
   });
 
   afterEach(async () => {
-    // Clean up: Remove the user and the created item after each test
     await User.deleteOne({ email: 'admin@example.com' });
     await Item.deleteMany({ name: 'Test Item' });
   });
@@ -40,6 +37,11 @@ describe('Item API Endpoints', () => {
         category: 'Device',
         serialNumber: 'TEST1234',
         condition: 'Good',
+        location: 'Main Office',
+        purchaseDate: '2024-01-15',
+        purchasePrice: 1299.99,
+        warranty: '2025-01-15',
+        maintenanceInterval: '1year',
       });
 
     expect(res.statusCode).toEqual(201);
@@ -47,7 +49,6 @@ describe('Item API Endpoints', () => {
   });
 
   it('should get all items', async () => {
-    // First, create an item to ensure there's something to get
     await request(app)
       .post('/api/items')
       .set('Authorization', `Bearer ${token}`)
@@ -56,6 +57,11 @@ describe('Item API Endpoints', () => {
         category: 'Device',
         serialNumber: 'TEST5678',
         condition: 'Good',
+        location: 'Main Office',
+        purchaseDate: '2024-01-15',
+        purchasePrice: 1299.99,
+        warranty: '2025-01-15',
+        maintenanceInterval: '1year',
       });
 
     const res = await request(app)
@@ -63,6 +69,6 @@ describe('Item API Endpoints', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(Array.isArray(res.body.items)).toBe(true);
   });
 });

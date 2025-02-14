@@ -1,3 +1,4 @@
+// src/routes/itemRoutes.js
 import express from 'express';
 import {
   createItem,
@@ -5,20 +6,12 @@ import {
   getItemById,
   updateItem,
   deleteItem,
+  exportItems,
 } from '../controllers/itemController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/items:
- *   post:
- *     summary: Create a new item
- *     tags: [Items]
- *     security:
- *       - bearerAuth: []
- */
 router.route('/')
   .post(protect, admin, createItem)
   .get(protect, getItems);
@@ -27,5 +20,7 @@ router.route('/:id')
   .get(protect, getItemById)
   .put(protect, admin, updateItem)
   .delete(protect, admin, deleteItem);
+
+router.get('/export', protect, admin, exportItems);
 
 export default router;
