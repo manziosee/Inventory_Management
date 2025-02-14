@@ -12,6 +12,7 @@ import personRoutes from './routes/personRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 import swaggerDocs from './swaggerOptions.js';
 
+
 dotenv.config();
 
 const app = express();
