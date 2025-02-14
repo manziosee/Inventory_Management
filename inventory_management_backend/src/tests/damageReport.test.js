@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../server');
+const app = require('../../server'); // Corrected path
 const mongoose = require('mongoose');
 const DamageReport = require('../../src/models/damageReportModel');
 const Item = require('../../src/models/itemModel');
@@ -11,7 +11,6 @@ let item;
 
 describe('Damage Report API Endpoints', () => {
   beforeEach(async () => {
-    // 1. Create an admin user
     const adminRes = await request(app)
       .post('/api/users')
       .send({
@@ -25,7 +24,6 @@ describe('Damage Report API Endpoints', () => {
     user = adminRes.body;
     token = adminRes.body.token;
 
-    // 2. Create an item
     const itemRes = await request(app)
       .post('/api/items')
       .set('Authorization', `Bearer ${token}`)
@@ -34,13 +32,17 @@ describe('Damage Report API Endpoints', () => {
         category: 'Device',
         serialNumber: 'DAMAGE123',
         condition: 'Good',
+        location: 'Main Office',
+        purchaseDate: '2024-01-15',
+        purchasePrice: 1299.99,
+        warranty: '2025-01-15',
+        maintenanceInterval: '1year',
       });
 
     item = itemRes.body;
   });
 
   afterEach(async () => {
-    // Clean up: Remove all created data
     await User.deleteMany({ email: 'admin@example.com' });
     await Item.deleteMany({ name: 'Damage Test Item' });
     await DamageReport.deleteMany({});
@@ -58,8 +60,8 @@ describe('Damage Report API Endpoints', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body).toHaveProperty('_id');
   });
-  it('should get all damageReports with pagination', async () => {
-    // First, create an item to ensure there's something to get
+
+  it('should get all damage reports with pagination', async () => {
     await request(app)
       .post('/api/damage-reports')
       .set('Authorization', `Bearer ${token}`)
@@ -67,13 +69,12 @@ describe('Damage Report API Endpoints', () => {
         itemId: item._id,
         damageReason: 'Screen cracked',
       });
+
     const res = await request(app)
-      .get(`/api/damage-reports?pageSize=1&pageNumber=1`)
+      .get('/api/damage-reports?pageSize=1&pageNumber=1')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.damageReports.length).toEqual(1);
   });
-
-  // Add more test cases for other functionalities (getting, updating damage reports)
 });

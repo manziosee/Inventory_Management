@@ -1,3 +1,4 @@
+// src/controllers/userController.js
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
@@ -9,9 +10,6 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
 export const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, password, phoneNumber, role } = req.body;
 
@@ -50,9 +48,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Auth user & get token
-// @route   POST /api/users/login
-// @access  Public
 export const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -79,9 +74,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
 export const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -99,9 +91,6 @@ export const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
 export const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 

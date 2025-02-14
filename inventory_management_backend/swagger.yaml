@@ -73,6 +73,39 @@ components:
           enum: [Program Manager, Inventory Manager]
         phoneNumber:
           type: string
+    Person:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        nationalId:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        residence:
+          type: string
+        assurerName:
+          type: string
+        assurerContact:
+          type: string
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: string
+        actionType:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
 
 paths:
   /api/items:
@@ -170,6 +203,21 @@ paths:
         204:
           description: Item deleted successfully
 
+  /api/items/export:
+    get:
+      summary: Export items to CSV
+      tags: [Items]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: CSV file of items
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
   /api/borrowings:
     post:
       summary: Create a new borrowing record
@@ -241,6 +289,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Borrowing'
 
+  /api/borrowings/export:
+    get:
+      summary: Export borrowings to CSV
+      tags: [Borrowings]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: CSV file of borrowings
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
   /api/damage-reports:
     post:
       summary: Create a new damage report
@@ -301,6 +364,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DamageReport'
+
+  /api/damage-reports/export:
+    get:
+      summary: Export damage reports to CSV
+      tags: [Damage Reports]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: CSV file of damage reports
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
 
   /api/users:
     post:
@@ -398,11 +476,240 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-    delete:
-      summary: Delete user account
+
+  /api/users/notifications:
+    get:
+      summary: Get user notifications
       tags: [Users]
       security:
         - bearerAuth: []
       responses:
+        200:
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /api/users/settings/notifications:
+    put:
+      summary: Update user notification settings
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notifications:
+                  type: boolean
+      responses:
+        200:
+          description: Notification settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /api/users/settings/password:
+    put:
+      summary: Update user password
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        200:
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/people:
+    post:
+      summary: Create a new person
+      tags: [People]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+      responses:
+        201:
+          description: Person created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+    get:
+      summary: Get a list of people
+      tags: [People]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of people
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+
+  /api/people/{id}:
+    get:
+      summary: Get person by ID
+      tags: [People]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the person to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Person details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+    put:
+      summary: Update a person
+      tags: [People]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the person to update
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+      responses:
+        200:
+          description: Person updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+    delete:
+      summary: Delete a person
+      tags: [People]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the person to delete
+          required: true
+          schema:
+            type: string
+      responses:
         204:
-          description: User account deleted successfully
+          description: Person deleted successfully
+
+  /api/dashboard/stats:
+    get:
+      summary: Get dashboard statistics
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalItems:
+                    type: integer
+                  activeUsers:
+                    type: integer
+                  itemsBorrowed:
+                    type: integer
+                  damageReports:
+                    type: integer
+
+  /api/dashboard/recent-activities:
+    get:
+      summary: Get recent activities
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of recent activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+  /api/dashboard/inventory-status:
+    get:
+      summary: Get inventory status
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Inventory status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category:
+                      type: string
+                    total:
+                      type: integer
+                    available:
+                      type: integer
+
+  /api/dashboard/export:
+    get:
+      summary: Export dashboard data to CSV
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: CSV file of dashboard data
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary

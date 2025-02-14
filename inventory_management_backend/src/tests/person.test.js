@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../../server');
+const app = require('../../server'); // Corrected path
 const mongoose = require('mongoose');
 const Person = require('../../src/models/personModel');
 const User = require('../../src/models/userModel');
@@ -9,7 +9,6 @@ let token;
 
 describe('Person API Endpoints', () => {
   beforeEach(async () => {
-    // 1. Create an admin user
     const adminRes = await request(app)
       .post('/api/users')
       .send({
@@ -25,7 +24,6 @@ describe('Person API Endpoints', () => {
   });
 
   afterEach(async () => {
-    // Clean up: Remove all created data
     await User.deleteMany({ email: 'admin@example.com' });
     await Person.deleteMany({ fullName: 'Test Person' });
   });
@@ -46,8 +44,8 @@ describe('Person API Endpoints', () => {
     expect(res.body).toHaveProperty('_id');
     expect(res.body.fullName).toEqual('Test Person');
   });
+
   it('should get all people with pagination', async () => {
-    // First, create an item to ensure there's something to get
     await request(app)
       .post('/api/people')
       .set('Authorization', `Bearer ${token}`)
@@ -58,8 +56,9 @@ describe('Person API Endpoints', () => {
         phoneNumber: '555-123-4561',
         residence: '123 Test St',
       });
+
     const res = await request(app)
-      .get(`/api/people?pageSize=1&pageNumber=1`)
+      .get('/api/people?pageSize=1&pageNumber=1')
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.statusCode).toEqual(200);

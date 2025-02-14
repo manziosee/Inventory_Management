@@ -2,17 +2,8 @@ import asyncHandler from 'express-async-handler';
 import Person from '../models/personModel.js';
 import SystemLog from '../models/systemLogModel.js';
 
-// @desc    Create a new person
-// @route   POST /api/people
-// @access  Private/Admin
 const createPerson = asyncHandler(async (req, res) => {
   const { fullName, nationalId, email, phoneNumber, residence, assurerName, assurerContact } = req.body;
-
-  const personExists = await Person.findOne({ nationalId });
-  if (personExists) {
-    res.status(400);
-    throw new Error('Person with this national ID already exists');
-  }
 
   const person = await Person.create({
     fullName,
@@ -24,111 +15,82 @@ const createPerson = asyncHandler(async (req, res) => {
     assurerContact,
   });
 
-  if (person) {
-    await SystemLog.create({
-      user: req.user._id,
-      actionType: 'PERSON_CREATED',
-      details: { personId: person._id },
-    });
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'PERSON_CREATED',
+    details: { personId: person._id },
+  });
 
-    res.status(201).json(person);
-  } else {
-    res.status(400);
-    throw new Error('Invalid person data');
-  }
+  res.status(201).json(person);
 });
 
-// @desc    Get all people
-// @route   GET /api/people
-// @access  Private
 const getPeople = asyncHandler(async (req, res) => {
-  const pageSize = Number(req.query.pageSize) || 10;
-  const page = Number(req.query.pageNumber) || 1;
+  const { pageSize = 10, pageNumber = 1, search = '', department = '' } = req.query;
 
-  const keyword = req.query.keyword
-    ? {
-        fullName: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {};
+  const query = {};
+  if (search) query.fullName = { $regex: search, $options: 'i' };
+  if (department) query.department = department;
 
-  const sortOrder = req.query.order === 'desc' ? -1 : 1; // 1 for ascending, -1 for descending
-  const sortField = req.query.orderBy || 'fullName'; // Default sort by name
+  const count = await Person.countDocuments(query);
+  const people = await Person.find(query)
+    .skip((pageNumber - 1) * pageSize)
+    .limit(Number(pageSize));
 
-  const count = await Person.countDocuments({ ...keyword });
-  const people = await Person.find({ ...keyword })
-    .sort({ [sortField]: sortOrder })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1));
-
-  res.json({ people, page, pages: Math.ceil(count / pageSize) });
+  res.json({
+    people,
+    page: Number(pageNumber),
+    pages: Math.ceil(count / pageSize),
+    pageSize: Number(pageSize),
+  });
 });
 
-// @desc    Get person by ID
-// @route   GET /api/people/:id
-// @access  Private
 const getPersonById = asyncHandler(async (req, res) => {
   const person = await Person.findById(req.params.id);
 
-  if (person) {
-    res.json(person);
-  } else {
+  if (!person) {
     res.status(404);
     throw new Error('Person not found');
   }
+
+  res.json(person);
 });
 
-// @desc    Update person
-// @route   PUT /api/people/:id
-// @access  Private/Admin
 const updatePerson = asyncHandler(async (req, res) => {
   const person = await Person.findById(req.params.id);
 
-  if (person) {
-    person.fullName = req.body.fullName || person.fullName;
-    person.email = req.body.email || person.email;
-    person.phoneNumber = req.body.phoneNumber || person.phoneNumber;
-    person.residence = req.body.residence || person.residence;
-    person.assurerName = req.body.assurerName || person.assurerName;
-    person.assurerContact = req.body.assurerContact || person.assurerContact;
-
-    const updatedPerson = await person.save();
-
-    await SystemLog.create({
-      user: req.user._id,
-      actionType: 'PERSON_UPDATED',
-      details: { personId: person._id },
-    });
-
-    res.json(updatedPerson);
-  } else {
+  if (!person) {
     res.status(404);
     throw new Error('Person not found');
   }
+
+  const updatedPerson = await Person.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'PERSON_UPDATED',
+    details: { personId: updatedPerson._id },
+  });
+
+  res.json(updatedPerson);
 });
 
-// @desc    Delete person
-// @route   DELETE /api/people/:id
-// @access  Private/Admin
 const deletePerson = asyncHandler(async (req, res) => {
   const person = await Person.findById(req.params.id);
 
-  if (person) {
-    await Person.deleteOne({_id: person._id});
-
-    await SystemLog.create({
-      user: req.user._id,
-      actionType: 'PERSON_DELETED',
-      details: { personId: req.params.id },
-    });
-
-    res.json({ message: 'Person removed' });
-  } else {
+  if (!person) {
     res.status(404);
     throw new Error('Person not found');
   }
+
+  await Person.findByIdAndDelete(req.params.id);
+
+  await SystemLog.create({
+    user: req.user._id,
+    actionType: 'PERSON_DELETED',
+    details: { personId: person._id },
+  });
+
+  res.json({ message: 'Person deleted' });
 });
 
 export {
