@@ -1,4 +1,4 @@
-import { Box, ClipboardList, Home, Settings, Users, AlertTriangle } from 'lucide-react';
+import { Box, ClipboardList, Home, Settings, Users, AlertTriangle, ShoppingCart, FileText, Truck } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 
@@ -8,6 +8,9 @@ const navigation = [
   { name: 'Borrowing', to: '/borrowing', icon: ClipboardList },
   { name: 'Damage Reports', to: '/damage-reports', icon: AlertTriangle },
   { name: 'People', to: '/people', icon: Users },
+  { name: 'Purchase Orders', to: '/purchase-orders', icon: ShoppingCart },
+  { name: 'Suppliers', to: '/suppliers', icon: Truck },
+  { name: 'Reports', to: '/reports', icon: FileText },
   { name: 'Settings', to: '/settings', icon: Settings },
 ];
 

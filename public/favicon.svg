@@ -1,5 +1,21 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="8" fill="#3B82F6"/>
-  <path d="M8 8H24M8 16H24M8 24H24" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <path d="M12 4L12 28M20 4L20 28" stroke="white" stroke-width="2" stroke-linecap="round"/>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" rx="20" fill="#3B82F6"/>
+  
+  <!-- Shark Body -->
+  <path d="M60 120 Q90 50, 160 90 Q190 110, 160 130 Q90 170, 60 120 Z" fill="#6DA3C3" stroke="#005577" stroke-width="3"/>
+  
+  <!-- Shark Smile -->
+  <path d="M100 130 Q120 150, 140 130" stroke="white" stroke-width="3" fill="none"/>
+  
+  <!-- Teeth -->
+  <path d="M102 130 L105 140 L108 130 M115 132 L118 140 L121 132 M128 130 L131 140 L134 130" stroke="white" stroke-width="2"/>
+  
+  <!-- Eye -->
+  <circle cx="130" cy="90" r="6" fill="black"/>
+  
+  <!-- Water Waves -->
+  <path d="M30 170 Q60 150, 90 170 T150 170 T190 170" stroke="white" stroke-width="2" fill="none"/>
+  
+  <!-- Text -->
+  <text x="50%" y="190" text-anchor="middle" fill="white" font-size="16" font-family="Arial" dy=".3em">Sharks</text>
 </svg>
