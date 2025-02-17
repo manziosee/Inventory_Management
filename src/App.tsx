@@ -16,6 +16,9 @@ import { NewDamageReportPage } from './pages/damage-reports/new';
 import { PeoplePage } from './pages/people';
 import { AddPersonPage } from './pages/people/add';
 import { SettingsPage } from './pages/settings';
+import { PurchaseOrdersPage } from './pages/purchase-orders';
+import { ReportsPage} from './pages/reports';
+import { SuppliersPage } from './pages/suppliers';
 
 // Mock authentication state
 const isAuthenticated = true; // This should be replaced with actual auth logic
@@ -79,6 +82,9 @@ function AppContent() {
               <Route path="/people" element={<PrivateRoute><PeoplePage /></PrivateRoute>} />
               <Route path="/people/add" element={<PrivateRoute><AddPersonPage /></PrivateRoute>} />
               <Route path="/settings" element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+              <Route path="/purchase-orders" element={<PrivateRoute><PurchaseOrdersPage /></PrivateRoute>} />
+              <Route path="/reports" element={<PrivateRoute><ReportsPage /></PrivateRoute>} />
+              <Route path="/suppliers" element={<PrivateRoute><SuppliersPage /></PrivateRoute>} />
               
               {/* Fallback route */}
               <Route path="*" element={<Navigate to="/" replace />} />
